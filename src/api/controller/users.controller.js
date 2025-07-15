@@ -56,7 +56,7 @@ exports.loginUser = async (req, res) => {
             maxAge: 3600000, // 1 ชั่วโมง (ในหน่วยมิลลิวินาที)
             // sameSite: 'strict', // แนะนำ: ป้องกัน CSRF (Cross-Site Request Forgery)
             // domain: 'yourdomain.com', // หาก Frontend และ Backend อยู่คนละ Subdomain
-            path: '/' // กำหนด path ของ cookie
+            // path: '/' // กำหนด path ของ cookie
         });
 
         res.status(result.status).json({ message: 'Login successful!!' });
