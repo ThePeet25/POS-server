@@ -4,9 +4,7 @@ const authentication = (req, res, next) => {
     // const token = req.cookies.jwt
     const token = req.cookies.jwt
 
-    console.log(token);
-
-    if(token === null) {
+    if(!token) {
         return res.status(401).json({ message: 'Access Denied: No Token.'});
     }
 

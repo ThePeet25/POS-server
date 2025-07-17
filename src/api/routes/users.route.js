@@ -7,6 +7,7 @@ const [ authentication, authorizeRoles ] = require('../../middleware/auth.middle
 
 router.post('/', usersController.createUser);
 router.post('/login', usersController.loginUser)
+router.post('/logout', authentication, authorizeRoles(['manager','cashier']),usersController.logout);
 
 //test role authorization
 router.get('/manager', authentication, authorizeRoles(['manager']), (req, res) => {

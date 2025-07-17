@@ -12,7 +12,7 @@ exports.createNewUser = async (userData) => {
         }
     })
     if (existingUser) {
-        return res.status(409).json({ message: 'Username already exists.' });
+        return res.status(400).json({ message: 'Username already exists.' });
     }
 
     // hash password
@@ -35,22 +35,19 @@ exports.loginUser = async (userData) => {
     // find username
     const user = await prisma.users.findUnique({
         where: {
-            username : username
+            username: username
         }
     })
 
-    // console.log(user)
     // check login
     if (!user) {
-        return { success: false, status : 401, message: 'Invalid credentials.' }
-        // return res.status(401).json({ message: 'Invalid credentials.' });
+        return { success: false, status: 401, message: 'Invalid credentials.' }
     }
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordCorrect) {
-        return { success: false, status : 401, message: 'Invalid credentials.' }
-        // return res.status(401).json({ message: 'Invalid credentials.' });
+        return { success: false, status: 401, message: 'Invalid credentials.' }
     }
 
     //username and password correct
@@ -58,7 +55,7 @@ exports.loginUser = async (userData) => {
     const token = jwt.sign(
         { userId: user.id, username: user.username, role: user.role },
         process.env.JWT_SECRET,
-        { expiresIn: '1h'}
+        { expiresIn: '1h' }
     )
 
     return { success: true, status: 200, token: token, user: { id: user.id, username: user.username } };

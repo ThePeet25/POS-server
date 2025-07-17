@@ -1,5 +1,6 @@
 //import users service
 const userService = require('../../servies/users.service');
+const jwt = require('jsonwebtoken');
 
 exports.createUser = async (req, res) => {
     const userData = req.body;
@@ -30,6 +31,24 @@ exports.createUser = async (req, res) => {
 
 exports.loginUser = async (req, res) => {
     const userData = req.body;
+
+    // check user has been log in?
+    const userLoggedIn = req.cookies.jwt;
+
+    if(userLoggedIn) {
+        try {
+            jwt.verify(userLoggedIn, process.env.JWT_SECRET);
+            return res.status(400).json({
+                message: 'you are logged in. pls log out before log in'
+            })
+        } catch(err) {
+            res.clearCookie('jwt', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                path: '/'
+            });
+        }
+    }
 
     // valid user data
     if (!userData || userData.length === 0) {
@@ -63,5 +82,20 @@ exports.loginUser = async (req, res) => {
     } catch (error) {
         console.error('Error during login:', error);
         res.status(500).json({ message: 'Server error during login.' });
+    }
+}
+
+exports.logout = async (req, res) => {
+    try {
+        res.clearCookie('jwt', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            path: '/',
+        })
+
+        return res.status(200).json({ message: 'Logged out successfully.'})
+    } catch(err) {
+        console.error("ERROR", err);
+        return res.status(500).json({ message: 'Server error during logout.'});
     }
 }
