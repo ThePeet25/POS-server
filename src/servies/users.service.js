@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 exports.createNewUser = async (userData) => {
-    const { username, password, role } = userData;
+    const { username, password } = userData;
 
     // check unique username
     const existingUser = await prisma.users.findUnique({
@@ -24,7 +24,6 @@ exports.createNewUser = async (userData) => {
         data: {
             username: username,
             password: hashedPassword,
-            role
         }
     })
 
