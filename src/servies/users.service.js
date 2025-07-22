@@ -8,7 +8,7 @@ exports.createNewUser = async (userData) => {
     // check unique username
     const existingUser = await prisma.users.findUnique({
         where: {
-            username: username
+            username
         }
     })
     if (existingUser) {
@@ -31,6 +31,7 @@ exports.createNewUser = async (userData) => {
 
 exports.loginUser = async (userData) => {
     const { username, password } = userData;
+
 
     // find username
     const user = await prisma.users.findUnique({
@@ -55,7 +56,7 @@ exports.loginUser = async (userData) => {
     const token = jwt.sign(
         { userId: user.id, username: user.username, role: user.role },
         process.env.JWT_SECRET,
-        { expiresIn: '1h' }
+        { algorithm: "HS512", expiresIn: '1h' }
     )
 
     return { success: true, status: 200, token: token, user: { id: user.id, username: user.username } };

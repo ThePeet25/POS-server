@@ -31,6 +31,7 @@ exports.createUser = async (req, res) => {
 
 exports.loginUser = async (req, res) => {
     const userData = req.body;
+    console.log(userData);
 
     // check user has been log in?
     const userLoggedIn = req.cookies.jwt;
