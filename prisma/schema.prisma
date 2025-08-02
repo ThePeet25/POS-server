@@ -143,7 +143,7 @@ model StockTransactions {
   productId        Int 
   transactionType  String   // 'restock', 'adjustment' หรือ 'return'
   quantity         Int      // จำนวนที่เติม (เป็น +) หรือลด (เป็น -)
-  costPerUnit      Decimal  @db.Decimal(10, 2) // ราคาต้นทุนต่อหน่วยในครั้งนั้นๆ
+  costPerUnit      Decimal?  @db.Decimal(10, 2) // ราคาต้นทุนต่อหน่วยในครั้งนั้นๆ
   transactionDate  DateTime @default(now())
 
   createdAt        DateTime @default(now())

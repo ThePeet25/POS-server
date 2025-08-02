@@ -103,32 +103,6 @@ exports.getProducts = async (
             }
         });
 
-        // const productsWithPromotions = await prisma.products.findMany({
-        //     // where:{
-        //     //     id: 803
-        //     // },
-        //     include: {
-        //         productPromotions: { // This refers to the 'ProductPromotions' relation field in your Products model
-        //             include: {
-        //                 promotion: { // This refers to the 'promotion' relation field in your ProductPromotions model
-        //                     select: {
-        //                         id: true,
-        //                         name: true,
-        //                         startDate: true,
-        //                         endDate: true,
-        //                         status: true,
-        //                         discountType: true,
-        //                         discountValue: true,
-        //                         remainingQuota: true,
-        //                         // createdAt: true, // You might not need these for the client display
-        //                         // updatedAt: true,
-        //                     },
-        //                 },
-        //             },
-        //         },
-        //     },
-        // });
-
         const productsWithPromotions = await prisma.products.findMany({
             // where:{
             //     id: 803
@@ -207,15 +181,6 @@ exports.getProducts = async (
 
         const totalPages = Math.ceil(totalProducts / limit);
 
-        // const products = productSet.map(data => ({
-        //     id: data.id,
-        //     name: data.name,
-        //     author: data.author,
-        //     price: data.price,
-        //     barcode: data.barcode,
-        //     quantity: data.quantity,
-        //     category: data.category.name
-        // }))
         return {
             products,
             totalProducts,

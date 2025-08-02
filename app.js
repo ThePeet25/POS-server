@@ -11,7 +11,7 @@ const users = require('./src/api/routes/users.routes')
 const products = require('./src/api/routes/products.routes')
 const categories = require('./src/api/routes/category.routes')
 const promotions = require('./src/api/routes/promotion.routes')
-const promotionService = require('./src/servies/promotion.service')
+const stock = require('./src/api/routes/stock.routes')
 
 const app = express();
 
@@ -31,6 +31,8 @@ app.use('/user', users);
 app.use('/product', products);
 app.use('/category', categories);
 app.use('/promotion', promotions);
+app.use('/stock', stock);
+
 app.get('/', (req, res) => {
     res.json({ messsage: 'fuck you'});
 })
