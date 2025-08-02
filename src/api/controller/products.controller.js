@@ -48,7 +48,7 @@ exports.getProducts = async (req, res) => {
         //response 
         res.status(200).json({
             products,
-            paging: {
+            pagination: {
                 totalPages,
                 currentPage,
                 itemPerPage,

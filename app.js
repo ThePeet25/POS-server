@@ -7,9 +7,10 @@ const morgan = require('morgan');
 
 
 //import file
-const users = require('./src/api/routes/users.route')
-const products = require('./src/api/routes/products.route')
+const users = require('./src/api/routes/users.routes')
+const products = require('./src/api/routes/products.routes')
 const categories = require('./src/api/routes/category.routes')
+const promotions = require('./src/api/routes/promotion.routes')
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use(cors({
 app.use('/user', users);
 app.use('/product', products);
 app.use('/category', categories);
+app.use('/promotion', promotions);
 app.get('/', (req, res) => {
     res.json({ messsage: 'fuck you'});
 })

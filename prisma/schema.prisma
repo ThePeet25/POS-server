@@ -18,7 +18,7 @@ datasource db {
 model Users {
   id        Int      @id @default(autoincrement())
   username  String   @unique @db.VarChar(50)
-  password String   @map("password_hash") @db.VarChar(255)
+  password  String   @map("password_hash") @db.VarChar(255)
   role      String   @default("cashier") @db.VarChar(20)
   create_at DateTime @default(now()) @map("created_at") @db.Timestamp(6)
 
@@ -53,7 +53,7 @@ model Products {
   category Categories @relation(fields: [categoryId], references: [id])
 
   // Relationships back to OrderItems
-  orderItems OrderItems[]
+  orderItems        OrderItems[]
   productPromotions ProductPromotions[]
 
   @@map("products")
@@ -94,21 +94,22 @@ model OrderItems {
 }
 
 model Promotions {
-  id                    Int       @id @default(autoincrement())
-  name                  String    @unique @db.VarChar(100)
-  startDate             DateTime  @map("start_date") @db.Timestamp(6)
-  endDate               DateTime  @map("end_date") @db.Timestamp(6)
-  discountType          String    @db.VarChar(50)
-  discountValue         Decimal   @db.Decimal(10, 2)
-  
+  id            Int             @id @default(autoincrement())
+  name          String?         @db.VarChar(100)
+  startDate     DateTime        @map("start_date") @db.Timestamp(6)
+  endDate       DateTime        @map("end_date") @db.Timestamp(6)
+  status        PromotionStatus @default(UPCOMING) // e.g., "upcoming", "active", "expired"
+  discountType  DiscountType   //perentage, fixed
+  discountValue Decimal         @db.Decimal(10, 2)
+
   // เพิ่มฟิลด์นี้สำหรับ "จำนวนสินค้าที่ลด" หรือ "จำนวนครั้งที่โปรโมชั่นใช้ได้"
-  // ผมจะตั้งชื่อว่า 'remaining_quota' และให้เป็น Int? เพื่อให้ null ได้ถ้าไม่มีโควต้าจำกัด
-  remainingQuota        Int?      @map("remaining_quota")
+  //'remaining_quota' และให้เป็น Int? เพื่อให้ null ได้ถ้าไม่มีโควต้าจำกัด
+  remainingQuota Int? @map("remaining_quota")
 
-  products              ProductPromotions[]
+  products ProductPromotions[]
 
-  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamp(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
 
   @@map("promotions")
 }
@@ -118,9 +119,20 @@ model ProductPromotions {
   productId   Int
   promotionId Int
 
-  product     Products   @relation(fields: [productId], references: [id])
-  promotion   Promotions @relation(fields: [promotionId], references: [id])
+  product   Products   @relation(fields: [productId], references: [id])
+  promotion Promotions @relation(fields: [promotionId], references: [id])
 
   @@id([productId, promotionId])
   @@map("product_promotions")
+}
+
+enum PromotionStatus {
+  UPCOMING
+  ACTIVE
+  EXPIRED
+}
+
+enum DiscountType {
+  PERCENT
+  FIXED
 }
