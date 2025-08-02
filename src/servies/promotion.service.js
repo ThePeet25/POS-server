@@ -1,8 +1,10 @@
 const prisma = require('../config/prisma');
-const { values } = require('../middleware/auth.middleware');
+// import { Prisma } from '@prisma/client';
+const { PromotionStatus } = require('../generated/prisma');
+
 
 exports.createNewPromotion = async (promotionData) => {
-    
+
     try {
 
         //step 1 find product id from name
@@ -10,17 +12,17 @@ exports.createNewPromotion = async (promotionData) => {
         const product = await prisma.products.findFirst({
             where: {
                 OR: [
-                { name: promotionData.product },
-                { barcode: promotionData.barcode }
-            ]
+                    { name: promotionData.product },
+                    { barcode: promotionData.barcode }
+                ]
             },
             select: {
                 id: true
             }
         });
-        
+
         if (!product || product.length === 0) {
-            return { success: false, status: 400, message: "can't find product name, pls make sure you enter product correctly"}
+            return { success: false, status: 400, message: "can't find product name, pls make sure you enter product correctly" }
         }
 
         const isHavePromotion = await prisma.productPromotions.findFirst({
@@ -29,20 +31,20 @@ exports.createNewPromotion = async (promotionData) => {
             }
         })
 
-        if(isHavePromotion) {
-            return { success: false, status: 400, message: "this product is already have promotion"};
+        if (isHavePromotion) {
+            return { success: false, status: 400, message: "this product is already have promotion" };
         }
         //step 2 create promotion
         //input enum validate
         const inputDiscountType = ['PERCENT', 'FIXED']
-        if(!inputDiscountType.includes(promotionData.discountType)) {
-            return { success: false, status: 400, message: "discount type doesn't have"}
+        if (!inputDiscountType.includes(promotionData.discountType)) {
+            return { success: false, status: 400, message: "discount type doesn't have" }
         }
 
         //discount valid
-        if(promotionData.discountType === 'PERCENT') {
+        if (promotionData.discountType === 'PERCENT') {
             if (promotionData.discountValue >= 100) {
-                return { success: false, status: 400, message: "discount percent type can't more than 100"}
+                return { success: false, status: 400, message: "discount percent type can't more than 100" }
             }
         }
 
@@ -52,14 +54,14 @@ exports.createNewPromotion = async (promotionData) => {
         const UTC = new Date();
         const start = new Date(promotionData.startDate)
         const end = new Date(promotionData.endDate)
-        let status = ''
-        if(UTC >= start && UTC <= end) {
-            status = 'ACTIVE'
-        } else if ( UTC < start){
-            status = 'UPCOMING'
-        } else {
-            status = 'EXPIRED'
-        }
+        let status = 'ACTIVE'
+        // if(UTC >= start && UTC <= end) {
+        //     status = 'ACTIVE'
+        // } else if ( UTC < start){
+        //     status = 'UPCOMING'
+        // } else {
+        //     status = 'EXPIRED'
+        // }
 
         //create promotion
         const newPromotion = await prisma.promotions.create({
@@ -82,7 +84,7 @@ exports.createNewPromotion = async (promotionData) => {
                 promotionId: newPromotion.id
             }
         })
-        return { success: true, promotion: newPromotion}
+        return { success: true, promotion: newPromotion }
     } catch (error) {
         console.error('Error creating promotion:', error);
         throw error;
@@ -90,13 +92,72 @@ exports.createNewPromotion = async (promotionData) => {
 
 }
 
-exports.getPromotions = async() => {
+exports.getPromotions = async () => {
     try {
         const result = await prisma.promotions.findMany({})
 
         return result
-    } catch(err) {
+    } catch (err) {
         console.error('Faild from promotion service ERROR:', err)
         throw err;
+    }
+}
+
+exports.updatePromotionStatuses = async () => {
+    try {
+        const current = new Date();
+        const upcomingToActive = await prisma.promotions.updateMany({
+            where: {
+                status: PromotionStatus.UPCOMING,
+                startDate: {
+                    lte: current
+                }
+            },
+            data: {
+                status: PromotionStatus.ACTIVE,
+                updatedAt: current,
+            }
+        })
+
+        console.log(`Updated ${upcomingToActive.count} upcoming promotions to active.`);
+
+        const activeToExpired = await prisma.promotions.updateMany({
+            where: {
+                status: PromotionStatus.ACTIVE,
+                endDate: {
+                    lt: current
+                }
+            },
+            data: {
+                status: PromotionStatus.EXPIRED,
+                updatedAt: current
+            }
+        })
+
+        console.log(`Updated ${activeToExpired.count} active promotions to expired.`);
+
+        const expiredPromotions = await prisma.promotions.findMany({
+            where: {
+                status: PromotionStatus.EXPIRED
+            },
+            select: {
+                id: true
+            }
+        })
+
+        const expiredPromotionIds = expiredPromotions.map(p => p.id)
+
+        if (expiredPromotionIds.length > 0) {
+            const deleteProductPromotions = prisma.productPromotions.deleteMany({
+                where: {
+                    promotionId: { in: expiredPromotionIds },
+                }
+            })
+            console.log(`Deleted ${deleteProductPromotions.count} product_promotions links for expired promotions.`);
+
+        }
+    } catch (err) {
+        console.error('Error during update promotins status ERROR:', err);
+        // throw err;
     }
 }
