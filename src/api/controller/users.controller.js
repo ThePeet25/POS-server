@@ -74,7 +74,6 @@ exports.loginUser = async (req, res) => {
             secure: process.env.NODE_ENV === 'production', // ใช้ secure: true เฉพาะใน Production (เมื่อใช้ HTTPS)
             maxAge: 1000*60*15, // 1 ชั่วโมง (ในหน่วยมิลลิวินาที)
             sameSite: 'None', // แนะนำ: ป้องกัน CSRF (Cross-Site Request Forgery)
-            domain: process.env.FRONT_END,
         });
 
         res.status(result.status).json({ message: 'Login successful!!' });
