@@ -70,11 +70,11 @@ exports.loginUser = async (req, res) => {
 
         // set cookie
         res.cookie('jwt', token, {
-            httpOnly: true, // สำคัญมาก! ป้องกันการเข้าถึงจาก JavaScript บน Client-side
+            // httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // ใช้ secure: true เฉพาะใน Production (เมื่อใช้ HTTPS)
-            maxAge: 3600000, // 1 ชั่วโมง (ในหน่วยมิลลิวินาที)
+            maxAge: 1000*60*15, // 1 ชั่วโมง (ในหน่วยมิลลิวินาที)
             // sameSite: 'strict', // แนะนำ: ป้องกัน CSRF (Cross-Site Request Forgery)
-            // domain: 'yourdomain.com', // หาก Frontend และ Backend อยู่คนละ Subdomain
+            domain: process.env.FRONT_END, // หาก Frontend และ Backend อยู่คนละ Subdomain
             // path: '/' // กำหนด path ของ cookie
         });
 
