@@ -20,6 +20,7 @@ model Users {
   username  String   @unique @db.VarChar(50)
   password  String   @map("password_hash") @db.VarChar(255)
   role      String   @default("cashier") @db.VarChar(20)
+  refreshToken String @map("refresh_token")
   create_at DateTime @default(now()) @map("created_at") @db.Timestamp(6)
 
   orders Orders[]
