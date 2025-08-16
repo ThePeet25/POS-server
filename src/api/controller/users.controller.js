@@ -33,11 +33,11 @@ exports.loginUser = async (req, res) => {
   const { username, password } = req.body;
   console.log("User data : ", username);
   // check user has been log in?
-  const userLoggedIn = req.cookies.accessToken;
+  const userLoggedIn = req.cookies.refreshToken;
 
   if (userLoggedIn) {
     try {
-      jwt.verify(userLoggedIn, process.env.ACCESS_JWT_SECRET);
+      jwt.verify(userLoggedIn, process.env.REFRESH_JWT_SECRET);
       return res.status(400).json({
         message: "you are logged in. pls log out before log in",
       });
@@ -46,6 +46,13 @@ exports.loginUser = async (req, res) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         path: "/",
+      });
+
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        sameSite: "None",
       });
     }
   }
@@ -84,7 +91,6 @@ exports.loginUser = async (req, res) => {
 
     res.status(result.status).json({
       message: "Login successful!!",
-      accessToken,
     });
   } catch (error) {
     console.error("Error during login:", error);
