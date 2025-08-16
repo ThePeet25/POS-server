@@ -78,7 +78,7 @@ exports.loginUser = async (req, res) => {
     // set cookie
     res.cookie("accessToken", accessToken, {
       secure: process.env.NODE_ENV === "production", // ใช้ secure: true เฉพาะใน Production (เมื่อใช้ HTTPS)
-      //   maxAge: 15 * 60 * 1000,
+      maxAge: 1 * 60 * 1000,
       sameSite: "none", // แนะนำ: ป้องกัน CSRF (Cross-Site Request Forgery)
     });
 
@@ -123,6 +123,7 @@ exports.logout = async (req, res) => {
 
 exports.refreshToken = async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
+  console.log(refreshToken);
 
   if (!refreshToken) return res.sendStatus(401);
 
@@ -131,7 +132,7 @@ exports.refreshToken = async (req, res) => {
       console.log(err);
       res.sendStatus(403);
     }
-    console.log(user);
+
     const newAccessToken = jwt.sign(
       { id: user.id, role: user.role },
       process.env.ACCESS_JWT_SECRET,
@@ -141,6 +142,7 @@ exports.refreshToken = async (req, res) => {
     res.cookie("accessToken", newAccessToken, {
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      maxAge: 1 * 60 * 1000,
     });
 
     res.status(200).json({
