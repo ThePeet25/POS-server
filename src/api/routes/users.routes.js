@@ -7,7 +7,6 @@ const [
   authentication,
   authorizeRoles,
 ] = require("../../middleware/auth.middleware");
-const { ro } = require("@faker-js/faker");
 
 router.post("/create", usersController.createUser);
 router.post("/login", usersController.loginUser);
