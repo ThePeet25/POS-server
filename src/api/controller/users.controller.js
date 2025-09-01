@@ -52,7 +52,7 @@ exports.loginUser = async (req, res) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         path: "/",
-        sameSite: "None",
+        sameSite: "Strict",
       });
     }
   }
@@ -78,15 +78,15 @@ exports.loginUser = async (req, res) => {
     // set cookie
     res.cookie("accessToken", accessToken, {
       secure: process.env.NODE_ENV === "production", // ใช้ secure: true เฉพาะใน Production (เมื่อใช้ HTTPS)
-      maxAge: 1 * 60 * 1000,
-      sameSite: "none", // แนะนำ: ป้องกัน CSRF (Cross-Site Request Forgery)
+      maxAge: 5 * 60 * 1000,
+      sameSite: "Strict", // แนะนำ: ป้องกัน CSRF (Cross-Site Request Forgery)
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
       secure: process.env.NODE_ENV === "production", // ใช้ secure: true เฉพาะใน Production (เมื่อใช้ HTTPS)
-      sameSite: "none", // แนะนำ: ป้องกัน CSRF (Cross-Site Request Forgery)
+      sameSite: "Strict", // แนะนำ: ป้องกัน CSRF (Cross-Site Request Forgery)
     });
 
     res.status(result.status).json({
@@ -101,17 +101,17 @@ exports.loginUser = async (req, res) => {
 exports.logout = async (req, res) => {
   try {
     res.clearCookie("accessToken", {
-      httpOnly: true,
+      // httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      sameSite: "None",
+      sameSite: "Strict",
     });
 
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      sameSite: "None",
+      sameSite: "Strict",
     });
 
     return res.status(200).json({ message: "Logged out successfully." });
@@ -136,7 +136,7 @@ exports.refreshToken = async (req, res) => {
     const newAccessToken = jwt.sign(
       { id: user.id, role: user.role },
       process.env.ACCESS_JWT_SECRET,
-      { expiresIn: "1m" }
+      { expiresIn: "5m" }
     );
 
     res.cookie("accessToken", newAccessToken, {
