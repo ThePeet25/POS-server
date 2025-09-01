@@ -1,12 +1,11 @@
-version: '3.8'
+version: "3.8"
 
-services: 
-
+services:
   # backend:
   #   build: ./
   #   container_name: backend
   #   ports:
-  #     - "3000:3000" 
+  #     - "3000:3000"
   #   environment: # เพิ่ม: Environment Variables ที่ Backend ต้องการ
   #     DATABASE_URL: ${DATABASE_URL}
   #     JWT_SECRET: ${JWT_SECRET}
@@ -26,28 +25,29 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - dev:/var/lib/postgresql/data
 
     networks:
       - backend_network
 
   pgadmin:
-    image: dpage/pgadmin4:8.8 
+    image: dpage/pgadmin4:8.8
     container_name: pgadmin_app
-    
+
     environment:
       - PGADMIN_DEFAULT_EMAIL=nuke@gmail.com
       - PGADMIN_DEFAULT_PASSWORD=12345678
       - PGADMIN_LISTEN_PORT=80 # Internal container port (usually 80)
-    
+
     ports:
-      - "8080:80" 
+      - "8080:80"
     networks:
       - backend_network
-      
+
 networks:
   backend_network:
-    driver: bridge 
+    driver: bridge
 
 volumes:
   postgres_data:
+  dev:

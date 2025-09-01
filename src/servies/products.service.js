@@ -229,10 +229,13 @@ exports.getOneProduct = async (product) => {
       price: productData.price,
       promotionPrice: discountPrice,
       barcode: productData.barcode,
-      quantity: productData.quantity,
     };
   }
 
-  console.log(product);
-  return productData;
+  return {
+    id: productData.id,
+    name: productData.name,
+    price: productData.price,
+    barcode: productData.barcode,
+  };
 };

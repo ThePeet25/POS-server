@@ -63,6 +63,7 @@ model Products {
 // --- Table: Orders ---
 model Orders {
   id            Int       @id @default(autoincrement())
+  // receiptId     String @unique @db.VarChar(4)
   userId        Int       @map("user_id") // Foreign key
   status        String    @default("pending") @db.VarChar(20)
   totalAmount   Decimal   @default(0.00) @map("total_amount") @db.Decimal(10, 2)
