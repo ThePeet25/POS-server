@@ -1,19 +1,22 @@
 version: "3.8"
 
 services:
-  # backend:
-  #   build: ./
-  #   container_name: backend
-  #   ports:
-  #     - "3000:3000"
-  #   environment: # เพิ่ม: Environment Variables ที่ Backend ต้องการ
-  #     DATABASE_URL: ${DATABASE_URL}
-  #     JWT_SECRET: ${JWT_SECRET}
-  #     NODE_ENV: ${NODE_ENV}
-  #   networks:
-  #     - backend_network
-  #   depends_on:
-  #     - db
+  backend:
+    build: ./
+    container_name: backend
+    ports:
+      - "3001:3001"
+    environment: # เพิ่ม: Environment Variables ที่ Backend ต้องการ
+      PORT: "3001"
+      DATABASE_URL: "postgres://admin:12345@db:5432/POS"
+      ACCESS_JWT_SECRET: "your acces secret"
+      REFRESH_JWT_SECRET: "your refresh secret"
+      FRONT_END: "http://localhost:3000"
+      NODE_ENV: "dev"
+    networks:
+      - backend_network
+    depends_on:
+      - db
 
   db:
     image: postgres:16.3-alpine
