@@ -1,15 +1,18 @@
-productService = require("../../servies/products.service");
+productService = require("../../services/products.service");
 
 exports.createProduct = async (req, res) => {
-  const productData = req.body;
-
-  //valid data
-  if (!productData || productData.length === 0) {
-    return res.status(400).json({ meassage: "missing product data" });
-  }
+  const { name, author, price, barcode, quantity, category, detail } = req.body;
 
   try {
-    const result = await productService.createNewProduct(productData);
+    const result = await productService.createNewProduct(
+      name,
+      author,
+      price,
+      barcode,
+      quantity,
+      category,
+      detail
+    );
 
     if (!result.success) {
       return res.status(result.status).json({ message: result.message });
@@ -39,6 +42,7 @@ exports.getProducts = async (req, res) => {
 
     const sortBy = req.query.sort || "name";
     const sortOrder = req.query.sortOrder || "asc";
+    const search = req.query.search || "";
 
     //call services
     const { products, totalPages, currentPage, itemPerPage } =
@@ -47,7 +51,8 @@ exports.getProducts = async (req, res) => {
         limit,
         category,
         sortBy,
-        sortOrder
+        sortOrder,
+        search
       );
 
     //response
@@ -66,6 +71,29 @@ exports.getProducts = async (req, res) => {
     res
       .status(500)
       .json({ message: "Failed to retrieve products.", err: err.message });
+  }
+};
+
+exports.getProductInfo = async (req, res) => {
+  const id = parseInt(req.params.id);
+
+  if (!id) {
+    res.status(400).json({
+      message: "Missing Id",
+    });
+  }
+
+  try {
+    const result = await productService.getProductInfo(id);
+
+    res.status(200).json({
+      restaurant: result,
+    });
+  } catch (error) {
+    console.log("Error during get product ERROR:", error);
+    res.status(500).json({
+      message: "Error during get product",
+    });
   }
 };
 

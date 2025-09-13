@@ -1,4 +1,4 @@
-const stockService = require("../../servies/stock.service");
+const stockService = require("../../services/stock.service");
 
 exports.createStock = async (req, res) => {
   const stockData = req.body;

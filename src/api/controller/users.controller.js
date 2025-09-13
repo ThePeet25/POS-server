@@ -1,5 +1,5 @@
 //import users service
-const userService = require("../../servies/users.service");
+const userService = require("../../services/users.service");
 const jwt = require("jsonwebtoken");
 
 exports.createUser = async (req, res) => {

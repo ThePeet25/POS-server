@@ -21,8 +21,9 @@ this is backend server for POS website porject
 | Method | Endpoint              | Description                                                                                    | Request Fields                                               |
 | ------ | --------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | POST   | /product/create       | create product                                                                                 | name, author, price, barcode, quantity, category             |
-| GET    | /product/getprodcuts? | limit = how many prodcut in one page, sort = order by and sortOrder = asc(1to100) desc(100to1) | query ?page=<number>&limit=<number> optional sort, sortOrder |
+| GET    | /product/getproducts? | limit = how many product in one page, sort = order by and sortOrder = asc(1to100) desc(100to1) | query ?page=<number>&limit=<number> optional sort, sortOrder |
 | POST   | /category/create      | create category                                                                                | name                                                         |
+| GET    | /product/:barcode     | get product from barcode using for sale page                                                   | None                                                         |
 
 ### category
 

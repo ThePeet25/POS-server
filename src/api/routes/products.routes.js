@@ -17,5 +17,6 @@ router.post(
 // router.get('/getproducts', authentication, authorizeRoles(['manager', 'cashier']), productController.getProducts)
 router.get("/getproducts", productController.getProducts);
 router.get("/get/:barcode", productController.getOneProduct);
+router.get("/information/:id", productController.getProductInfo);
 
 module.exports = router;

@@ -18,9 +18,27 @@ const findCategoryId = async (category) => {
   return categoryId.id;
 };
 
-exports.createNewProduct = async (productData) => {
-  const { name, author, price, barcode, quantity, category } = productData;
+const priceCalculate = (price, Promotions) => {
+  let discountPrice;
+  if (Promotions.discountType === "PERCENT") {
+    discountPrice =
+      Math.round((price - (Promotions.discountValue / 100) * price) * 100) /
+      100;
+  } else {
+    discountPrice = price - Promotions.discountValue;
+  }
+  return discountPrice;
+};
 
+exports.createNewProduct = async (
+  name,
+  author,
+  price,
+  barcode,
+  quantity = 0,
+  category,
+  detail
+) => {
   // check unique product
   const existingProducts = await prisma.products.findFirst({
     where: {
@@ -49,6 +67,7 @@ exports.createNewProduct = async (productData) => {
       barcode,
       quantity,
       categoryId,
+      detail,
     },
   });
 
@@ -60,7 +79,8 @@ exports.getProducts = async (
   limit,
   category = null,
   sortBy = "name",
-  sortOrder = "asc"
+  sortOrder = "asc",
+  search = null
 ) => {
   const offset = (page - 1) * limit;
   const whereClause = {};
@@ -77,6 +97,23 @@ exports.getProducts = async (
     } else {
       whereClause.categoryId = categoryId;
     }
+  }
+
+  if (search) {
+    whereClause.OR = [
+      {
+        name: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+      {
+        barcode: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+    ];
   }
 
   // Build the ORDER BY clause
@@ -136,18 +173,12 @@ exports.getProducts = async (
     // console.log(JSON.stringify(productsWithPromotions, null, 2));
     const products = productsWithPromotions.map((data) => {
       const isHavePromotion = data.productPromotions[0] || null;
-      let discountPrice;
       if (isHavePromotion !== null) {
-        if (isHavePromotion.promotion.discountType === "PERCENT") {
-          discountPrice =
-            Math.round(
-              (data.price -
-                (isHavePromotion.promotion.discountValue / 100) * data.price) *
-                100
-            ) / 100;
-        } else {
-          discountPrice = data.price - isHavePromotion.promotion.discountValue;
-        }
+        let discountPrice = priceCalculate(
+          data.price,
+          isHavePromotion.promotion
+        );
+
         return {
           id: data.id,
           name: data.name,
@@ -208,7 +239,12 @@ exports.getOneProduct = async (product) => {
     },
   });
 
+  if (productData === null) {
+    return false;
+  }
+
   const isHavePromotion = productData.productPromotions[0] || null;
+
   let discountPrice;
   if (isHavePromotion !== null) {
     if (isHavePromotion.promotion.discountType === "PERCENT") {
@@ -238,4 +274,61 @@ exports.getOneProduct = async (product) => {
     price: productData.price,
     barcode: productData.barcode,
   };
+};
+
+exports.getProductInfo = async (id) => {
+  //1. query restaurant
+  const restaurant = await prisma.products.findFirst({
+    where: {
+      id,
+    },
+    select: {
+      id: true,
+      name: true,
+      price: true,
+      author: true,
+      detail: true,
+      quantity: true,
+      category: {
+        select: {
+          name: true,
+        },
+      },
+      productPromotions: {
+        select: {
+          promotion: {
+            select: {
+              discountType: true,
+              discountValue: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  //2. map restaurant
+  let restaurantInfo = {
+    id,
+    name: restaurant.name,
+    price: restaurant.price,
+    author: restaurant.author,
+    quantity: restaurant.quantity,
+    category: restaurant.category.name,
+    detail: restaurant.detail,
+  };
+
+  const isHavePromotion = restaurant.productPromotions[0] || null;
+  if (isHavePromotion) {
+    let discountPrice = priceCalculate(
+      restaurant.price,
+      isHavePromotion.promotion
+    );
+
+    restaurantInfo.discountType = isHavePromotion.promotion.discountType;
+    restaurantInfo.discountValue = isHavePromotion.promotion.discountValue;
+    restaurantInfo.discountPrice = discountPrice;
+  }
+
+  return restaurantInfo;
 };

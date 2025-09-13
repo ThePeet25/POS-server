@@ -23,7 +23,7 @@ router.get(
   authentication,
   authorizeRoles(["manager"]),
   (req, res) => {
-    res.json({ messgae: "Role can be use" });
+    res.json({ message: "Role can be use" });
   }
 );
 

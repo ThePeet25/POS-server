@@ -1,4 +1,4 @@
-const orderService = require("../../servies/order.service");
+const orderService = require("../../services/order.service");
 
 function generateReceiptId(length = 4) {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
