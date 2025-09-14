@@ -37,7 +37,7 @@ app.use("/stock", stock);
 app.use("/setup", setup);
 
 app.get("/", (req, res) => {
-  res.json({ messsage: "hello world" });
+  res.json({ message: "hello world" });
 });
 
 app.listen(PORT, () => {

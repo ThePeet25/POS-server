@@ -18,12 +18,12 @@ this is backend server for POS website porject
 
 ### product
 
-| Method | Endpoint              | Description                                                                                    | Request Fields                                               |
-| ------ | --------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| POST   | /product/create       | create product                                                                                 | name, author, price, barcode, quantity, category             |
-| GET    | /product/getproducts? | limit = how many product in one page, sort = order by and sortOrder = asc(1to100) desc(100to1) | query ?page=<number>&limit=<number> optional sort, sortOrder |
-| POST   | /category/create      | create category                                                                                | name                                                         |
-| GET    | /product/:barcode     | get product from barcode using for sale page                                                   | None                                                         |
+| Method | Endpoint                 | Description                                                                                    | Request Fields                                               |
+| ------ | ------------------------ | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| POST   | /product/create          | create product                                                                                 | name, author, price, barcode, quantity, category             |
+| GET    | /product/getproducts?    | limit = how many product in one page, sort = order by and sortOrder = asc(1to100) desc(100to1) | query ?page=<number>&limit=<number> optional sort, sortOrder |
+| GET    | /product/get/:barcode    | get product from barcode using for sale page                                                   | None                                                         |
+| GET    | /product/information/:id | get product information by id use in product information                                       | None                                                         |
 
 ### category
 
@@ -42,3 +42,4 @@ this is backend server for POS website porject
 | Method | Endpoint          | Description      | Request Fields                                                                               |
 | ------ | ----------------- | ---------------- | -------------------------------------------------------------------------------------------- |
 | POST   | /promotion/create | create promotion | startDate, endDate, discountType, discountValue, product <br> optional: remainingQuota, name |
+| GET    | /promotion/get    | get promotion    | None                                                                                         |
