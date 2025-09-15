@@ -11,29 +11,34 @@ function generateReceiptId(length = 4) {
 }
 
 exports.createOrder = async (req, res) => {
-  const { orderLists, amount } = req.body;
+  const { orderLists, total_price } = req.body;
   const user = req.user;
   const receiptId = generateReceiptId();
 
-  if (!orderLists || !amount || !user) {
+  if (!orderLists || !total_price || !user) {
     return res.status(400).json({
       message: "missing order data",
     });
   }
 
   try {
-    const order = orderService.createOrder(
+    const order = await orderService.createOrder(
       receiptId,
       orderLists,
-      amount,
+      total_price,
       user.id
     );
 
     if (!order.success) {
-      res.status(order.status).json({
+      return res.status(order.status).json({
         message: order.message,
       });
     }
+
+    res.status(201).json({
+      message: "Create order success",
+      id: order.result,
+    });
   } catch (err) {
     console.error("Error during create order ERROR:", err);
     res.status(500).json({

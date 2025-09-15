@@ -12,6 +12,7 @@ const categories = require("./src/api/routes/category.routes");
 const promotions = require("./src/api/routes/promotion.routes");
 const stock = require("./src/api/routes/stock.routes");
 const setup = require("./src/api/routes/setup.routes");
+const order = require("./src/api/routes/order.routes");
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/product", products);
 app.use("/category", categories);
 app.use("/promotion", promotions);
 app.use("/stock", stock);
+app.use("/order", order);
 app.use("/setup", setup);
 
 app.get("/", (req, res) => {

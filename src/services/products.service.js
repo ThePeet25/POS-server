@@ -217,16 +217,18 @@ exports.getProducts = async (
 };
 
 exports.getOneProduct = async (product) => {
+  //1. query product
   const productData = await prisma.products.findFirst({
     where: {
       OR: [{ name: product }, { barcode: product }],
     },
     select: {
+      id: true,
       name: true,
       price: true,
-      barcode: true, // เพิ่มคอลัมน์ barcode
+      barcode: true,
       productPromotions: {
-        include: {
+        select: {
           promotion: {
             select: {
               discountType: true,
@@ -243,37 +245,29 @@ exports.getOneProduct = async (product) => {
     return false;
   }
 
-  const isHavePromotion = productData.productPromotions[0] || null;
-
-  let discountPrice;
-  if (isHavePromotion !== null) {
-    if (isHavePromotion.promotion.discountType === "PERCENT") {
-      discountPrice =
-        Math.round(
-          (productData.price -
-            (isHavePromotion.promotion.discountValue / 100) *
-              productData.price) *
-            100
-        ) / 100;
-    } else {
-      discountPrice =
-        productData.price - isHavePromotion.promotion.discountValue;
-    }
-    return {
-      id: productData.id,
-      name: productData.name,
-      price: productData.price,
-      promotionPrice: discountPrice,
-      barcode: productData.barcode,
-    };
-  }
-
-  return {
+  //2. map result
+  let productResult = {
     id: productData.id,
     name: productData.name,
     price: productData.price,
     barcode: productData.barcode,
   };
+
+  //3. add promotion price if have
+  const isHavePromotion = productData.productPromotions[0] || null;
+
+  let discountPrice;
+  if (isHavePromotion !== null) {
+    discountPrice = priceCalculate(
+      productData.price,
+      isHavePromotion.promotion
+    );
+
+    productResult.promotionPrice = discountPrice;
+  }
+
+  //4. return result
+  return productResult;
 };
 
 exports.getProductInfo = async (id) => {
@@ -318,6 +312,7 @@ exports.getProductInfo = async (id) => {
     detail: restaurant.detail,
   };
 
+  //3. add promotion price if have
   const isHavePromotion = restaurant.productPromotions[0] || null;
   if (isHavePromotion) {
     let discountPrice = priceCalculate(

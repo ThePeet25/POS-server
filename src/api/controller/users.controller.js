@@ -142,7 +142,7 @@ exports.refreshToken = async (req, res) => {
     res.cookie("accessToken", newAccessToken, {
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      maxAge: 1 * 60 * 1000,
+      maxAge: 5 * 60 * 1000,
     });
 
     res.status(200).json({

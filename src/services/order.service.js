@@ -16,41 +16,152 @@ const findProductId = async (productName) => {
   return productId.id;
 };
 
-exports.createOrder = async (orderLists, amount, userId) => {
-  try {
-    //create order and select order id
-    const order = prisma.orders.create({
+const priceCalculate = (price, Promotions) => {
+  let discountPrice;
+  if (Promotions.discountType === "PERCENT") {
+    discountPrice =
+      Math.round((price - (Promotions.discountValue / 100) * price) * 100) /
+      100;
+  } else {
+    discountPrice = price - Promotions.discountValue;
+  }
+  return discountPrice;
+};
+
+exports.createOrder = async (receiptId, orderLists, total_price, userId) => {
+  //1. get product ID from order
+  const productIds = orderLists.map((item) => item.productId);
+
+  //2. query products
+  const products = await prisma.products.findMany({
+    where: {
+      id: {
+        in: productIds,
+      },
+    },
+    select: {
+      id: true,
+      price: true,
+      quantity: true,
+      productPromotions: {
+        select: {
+          promotion: {
+            select: {
+              discountType: true,
+              discountValue: true,
+              remainingQuota: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  //3. product length
+  if (productIds.length !== products.length) {
+    return {
+      success: false,
+      status: 400,
+      message: "Some products not found",
+    };
+  }
+
+  //4. map to dictionary
+  const productMap = {};
+  products.forEach((p) => {
+    productMap[p.id] = p;
+  });
+
+  //5. calculate price
+  let totalPrice = 0;
+  const orderItems = orderLists.map((item) => {
+    const product = productMap[item.productId];
+
+    if (product.quantity < item.quantity) {
+      throw new Error(`Not enough stock for product ${item.productId}`);
+    }
+
+    const isHavePromotion = product.productPromotions[0] || null;
+    if (isHavePromotion) {
+      let discountPrice = priceCalculate(
+        product.price,
+        isHavePromotion.promotion
+      );
+
+      totalPrice += discountPrice * item.quantity;
+      return {
+        orderId: item.id,
+        price: discountPrice,
+        productId: item.productId,
+        quantity: item.quantity,
+      };
+    }
+
+    totalPrice += item.price * item.quantity;
+    return {
+      orderId: item.id,
+      price: product.price,
+      productId: item.productId,
+      quantity: item.quantity,
+    };
+  });
+
+  // try {
+  //   //  create orderId
+  //   const order = await prisma.orders.create({
+  //     data: {
+  //       receiptId,
+  //       userId,
+  //       totalAmount: total_price,
+  //     },
+  //     select: {
+  //       id: true,
+  //     },
+  //   });
+
+  //   // . map order lists for create many
+  //   const orderItem = orderLists.map((data) => ({
+  //     orderId: order.id,
+  //     productId: data.productId,
+  //     quantity: data.quantity,
+  //     price: data.price,
+  //   }));
+
+  //   console.log(orderItem);
+  //   await prisma.orderItems.createMany({
+  //     data: orderItem,
+  //   });
+  //   return { success: true };
+  // } catch (err) {
+  //   console.error("Error during create order service ERROR:", err);
+  //   throw err;
+  // }
+
+  //6. create data
+  const result = await prisma.$transaction(async (tx) => {
+    const order = await tx.orders.create({
       data: {
+        receiptId,
         userId,
-        totalAmount: amount,
+        totalAmount: totalPrice,
       },
       select: {
         id: true,
       },
     });
 
-    orderLists.foreach((orderItem) => {
-      console.log(orderItem);
-      const productId = findProductId(orderItem.product);
-
-      if (productId === null) {
-        console.error("Can't find product Id");
-        return {
-          success: false,
-          status: 400,
-          message: "product doesnt exsist",
-        };
-      }
-
-      prisma.orderItems.create({
-        data: {
-          orderId: order.id,
-          productId,
-        },
-      });
+    await tx.orderItems.createMany({
+      data: orderItems.map((item) => ({
+        ...item,
+        orderId: order.id,
+      })),
     });
-  } catch (err) {
-    console.error("Error during create order service ERROR:", err);
-    throw err;
-  }
+
+    return receiptId;
+  });
+
+  return {
+    result,
+    success: true,
+  };
 };

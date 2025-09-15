@@ -48,7 +48,7 @@ exports.createStock = async (stockData) => {
 
   const productId = await findProductId(product);
   if (productId === null) {
-    return { success: false, status: 400, message: "product doesnt exsist" };
+    return { success: false, status: 400, message: "product doesnt exist" };
   }
 
   const result = await prisma.$transaction(async (prisma) => {

@@ -133,7 +133,7 @@ exports.getPromotions = async () => {
     return result.map((data) => ({
       startDate: data.promotion.startDate,
       endDate: data.promotion.endDate,
-      name: data.product.name,
+      product: data.product.name,
       discountType: data.promotion.discountType,
       discountValue: data.promotion.discountValue,
       quota: data.promotion.remainingQuota,

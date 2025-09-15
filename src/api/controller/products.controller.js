@@ -102,7 +102,7 @@ exports.getOneProduct = async (req, res) => {
   console.log(product);
 
   if (!product || !product.length === 0) {
-    return res.status(400).json({ meassage: "missing product data" });
+    return res.status(400).json({ message: "missing product data" });
   }
 
   try {
