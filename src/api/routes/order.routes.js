@@ -9,6 +9,13 @@ const orderController = require("../controller/order.controller");
 
 const router = express.Router();
 
-router.post("/create", authentication, orderController.createOrder);
+router.post(
+  "/create",
+  authentication,
+  authorizeRoles(["manager"]),
+  orderController.createOrder
+);
+
+router.get("/get", authentication, orderController.getOrders);
 
 module.exports = router;

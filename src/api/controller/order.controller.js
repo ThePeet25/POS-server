@@ -46,3 +46,23 @@ exports.createOrder = async (req, res) => {
     });
   }
 };
+
+exports.getOrders = async (req, res) => {
+  const page = req.query.page || 1;
+  const limit = req.query.limit || 20;
+  const search = req.query.search || "";
+  const date = req.query.date || null;
+
+  try {
+    const orderLists = await orderService.getOrders(page, limit, search, date);
+
+    res.status(200).json({
+      ...orderLists,
+    });
+  } catch (error) {
+    console.log("Error during get order ERROR:", error);
+    res.status(500).json({
+      message: "Error during get order",
+    });
+  }
+};

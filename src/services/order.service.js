@@ -1,4 +1,5 @@
 const prisma = require("../config/prisma");
+const { includes } = require("../middleware/auth.middleware");
 
 const findProductId = async (productName) => {
   const productId = await prisma.products.findFirst({
@@ -106,37 +107,6 @@ exports.createOrder = async (receiptId, orderLists, total_price, userId) => {
     };
   });
 
-  // try {
-  //   //  create orderId
-  //   const order = await prisma.orders.create({
-  //     data: {
-  //       receiptId,
-  //       userId,
-  //       totalAmount: total_price,
-  //     },
-  //     select: {
-  //       id: true,
-  //     },
-  //   });
-
-  //   // . map order lists for create many
-  //   const orderItem = orderLists.map((data) => ({
-  //     orderId: order.id,
-  //     productId: data.productId,
-  //     quantity: data.quantity,
-  //     price: data.price,
-  //   }));
-
-  //   console.log(orderItem);
-  //   await prisma.orderItems.createMany({
-  //     data: orderItem,
-  //   });
-  //   return { success: true };
-  // } catch (err) {
-  //   console.error("Error during create order service ERROR:", err);
-  //   throw err;
-  // }
-
   //6. create data
   const result = await prisma.$transaction(async (tx) => {
     const order = await tx.orders.create({
@@ -163,5 +133,29 @@ exports.createOrder = async (receiptId, orderLists, total_price, userId) => {
   return {
     result,
     success: true,
+  };
+};
+
+exports.getOrders = async (page = 1, limit = 20, search, date = null) => {
+  //1. set where clause
+  let whereClause = {};
+
+  if (search) {
+    whereClause.receiptId = search;
+  }
+
+  //2. query
+  const orderLists = await prisma.orders.findMany({
+    where: whereClause,
+    select: {
+      createdAt: true,
+      receiptId: true,
+      id: true,
+    },
+  });
+
+  return {
+    message: "ok",
+    orderLists,
   };
 };

@@ -14,7 +14,7 @@ this is backend server for POS website porject
 | POST   | /user/login   | log in                                  | username, password |
 | POST   | /user/logout  | log out                                 | None               |
 | POST   | /user/refresh | get new access token from refresh token | None               |
-| GET    | /user/manager | test role acess                         | None               |
+| GET    | /user/manager | test role access                        | None               |
 
 ### product
 
@@ -33,9 +33,10 @@ this is backend server for POS website porject
 
 ### stock
 
-| Method | Endpoint      | Description  | Request Fields                                                |
-| ------ | ------------- | ------------ | ------------------------------------------------------------- |
-| POST   | /stock/create | create stock | product, transactionType, quantity <br> optional: costPerUnit |
+| Method | Endpoint      | Description       | Request Fields                                                |
+| ------ | ------------- | ----------------- | ------------------------------------------------------------- |
+| POST   | /stock/create | create stock      | product, transactionType, quantity <br> optional: costPerUnit |
+| GET    | /stock/get    | get stock history | page, limit, <br> search,date                                 |
 
 ### promotion
 
@@ -43,3 +44,10 @@ this is backend server for POS website porject
 | ------ | ----------------- | ---------------- | -------------------------------------------------------------------------------------------- |
 | POST   | /promotion/create | create promotion | startDate, endDate, discountType, discountValue, product <br> optional: remainingQuota, name |
 | GET    | /promotion/get    | get promotion    | None                                                                                         |
+
+### order
+
+| Method | Endpoint      | Description                    | Request Fields                                           |
+| ------ | ------------- | ------------------------------ | -------------------------------------------------------- |
+| POST   | /order/create | create oder using in sale page | orderLists: [{ productId, price, quantity}], total_price |
+| GET    | /order/get    | get order lists                | limit, page optional: search, date                       |
