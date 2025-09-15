@@ -42,7 +42,7 @@ exports.createNewProduct = async (
   // check unique product
   const existingProducts = await prisma.products.findFirst({
     where: {
-      OR: [{ barcode }],
+      AND: [{ barcode }, { isDeleted: false }],
     },
   });
 
@@ -83,7 +83,9 @@ exports.getProducts = async (
   search = null
 ) => {
   const offset = (page - 1) * limit;
-  const whereClause = {};
+  const whereClause = {
+    isDeleted: false,
+  };
 
   //check have category id
   if (category !== null) {
@@ -128,10 +130,6 @@ exports.getProducts = async (
 
     //get products
     const productsWithPromotions = await prisma.products.findMany({
-      // where:{
-      //     id: 803
-      // },
-      // เพิ่ม select block ที่นี่
       skip: offset,
       take: limit,
       where: whereClause,
@@ -220,7 +218,15 @@ exports.getOneProduct = async (product) => {
   //1. query product
   const productData = await prisma.products.findFirst({
     where: {
-      OR: [{ name: product }, { barcode: product }],
+      AND: [
+        { isDeleted: false },
+        {
+          OR: [
+            { name: { contains: product, mode: "insensitive" } },
+            { barcode: { contains: product, mode: "insensitive" } },
+          ],
+        },
+      ],
     },
     select: {
       id: true,
@@ -274,7 +280,7 @@ exports.getProductInfo = async (id) => {
   //1. query restaurant
   const restaurant = await prisma.products.findFirst({
     where: {
-      id,
+      AND: [{ id }, { isDeleted: false }],
     },
     select: {
       id: true,
@@ -326,4 +332,15 @@ exports.getProductInfo = async (id) => {
   }
 
   return restaurantInfo;
+};
+
+exports.deleteProduct = async (name) => {
+  await prisma.products.update({
+    where: {
+      name,
+    },
+    data: {
+      isDeleted: true,
+    },
+  });
 };

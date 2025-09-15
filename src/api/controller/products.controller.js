@@ -122,3 +122,19 @@ exports.getOneProduct = async (req, res) => {
     });
   }
 };
+
+exports.deleteProduct = async (req, res) => {
+  const name = req.body.name;
+
+  try {
+    const result = await productService.deleteProduct(name);
+    res.status(200).json({
+      message: "delete success",
+    });
+  } catch (error) {
+    console.error("Error during delete product ERROR:", error);
+    res.status(500).json({
+      message: "Error during delete product",
+    });
+  }
+};

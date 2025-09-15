@@ -64,6 +64,7 @@ router.get("/", async (req, res) => {
           barcode: faker.string.numeric(13), // 13-digit barcode
           quantity: faker.number.int({ min: 10, max: 200 }), // Quantity between 10 and 200
           categoryId: faker.number.int({ min: 1, max: 4 }), // Assign the actual category ID
+          detail: faker.commerce.productDescription(),
         };
         productsToCreate.push(product);
       }
