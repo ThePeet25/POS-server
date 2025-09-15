@@ -24,6 +24,7 @@ this is backend server for POS website porject
 | GET    | /product/getproducts?    | limit = how many product in one page, sort = order by and sortOrder = asc(1to100) desc(100to1) | query ?page=<number>&limit=<number> optional sort, sortOrder |
 | GET    | /product/get/:barcode    | get product from barcode using for sale page                                                   | None                                                         |
 | GET    | /product/information/:id | get product information by id use in product information                                       | None                                                         |
+| DELETE | /product/delete          | delete product using in stock page                                                             | name                                                         |
 
 ### category
 
@@ -43,7 +44,7 @@ this is backend server for POS website porject
 | Method | Endpoint          | Description      | Request Fields                                                                               |
 | ------ | ----------------- | ---------------- | -------------------------------------------------------------------------------------------- |
 | POST   | /promotion/create | create promotion | startDate, endDate, discountType, discountValue, product <br> optional: remainingQuota, name |
-| GET    | /promotion/get    | get promotion    | None                                                                                         |
+| GET    | /promotion/get    | get promotion    | limit, page optional: search, date                                                           |
 
 ### order
 

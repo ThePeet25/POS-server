@@ -1,4 +1,5 @@
 const prisma = require("../config/prisma");
+const dateConvert = require("../lib/dateconvert");
 const { includes } = require("../middleware/auth.middleware");
 
 const findProductId = async (productName) => {
@@ -144,6 +145,14 @@ exports.getOrders = async (page = 1, limit = 20, search, date = null) => {
     whereClause.receiptId = search;
   }
 
+  if (date) {
+    const { startUtcDate, endUtcDate } = dateConvert.toGMT0(date);
+    whereClause.createdAt = {
+      gte: startUtcDate,
+      lte: endUtcDate,
+    };
+  }
+
   //2. query
   const orderLists = await prisma.orders.findMany({
     where: whereClause,
@@ -154,8 +163,15 @@ exports.getOrders = async (page = 1, limit = 20, search, date = null) => {
     },
   });
 
+  //3. map
+  const orderResult = orderLists.map((order) => ({
+    date: dateConvert.toGMT7String(order.createdAt),
+    receiptId: order.receiptId,
+    id: order.id,
+  }));
+
   return {
     message: "ok",
-    orderLists,
+    orderResult,
   };
 };

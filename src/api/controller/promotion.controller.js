@@ -31,18 +31,29 @@ exports.createPromotion = async (req, res) => {
 };
 
 exports.getPromotions = async (req, res) => {
-  try {
-    const result = await promotionService.getPromotions();
+  const limit = req.query.limit;
+  const page = req.query.page;
+  const search = req.query.search || null;
+  const date = req.query.date || null;
 
-    res.status(200).json({
-      promotion: result,
-    });
-  } catch (err) {
-    console.error("Failed to get promotion ERROR:", err);
-    res.status(500).json({
-      message: "Failed during promotion",
-    });
-  }
+  if (!limit || !page)
+    try {
+      const result = await promotionService.getPromotions(
+        limit,
+        page,
+        search,
+        date
+      );
+
+      res.status(200).json({
+        promotion: result,
+      });
+    } catch (err) {
+      console.error("Failed to get promotion ERROR:", err);
+      res.status(500).json({
+        message: "Failed during promotion",
+      });
+    }
 };
 
 // exports.updatePromotionStatuses = async (req, res) => {

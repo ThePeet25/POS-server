@@ -1,5 +1,5 @@
 class DateConverter {
-  constructor(offsetHours = 7) {
+  constructor(offsetHours = 7 * 60 * 60 * 1000) {
     this.offsetHours = offsetHours;
   }
 
@@ -12,24 +12,32 @@ class DateConverter {
 
     const localDate = new Date(Date.UTC(year, month - 1, day));
 
-    localDate.setUTCHours(localDate.getHours() - this.offsetHours);
+    const startUtcDate = new Date(localDate.getTime() - this.offsetHours);
+    const endUtcDate = new Date(
+      startUtcDate.getTime() + 24 * 60 * 60 * 1000 - 1
+    );
 
-    return localDate;
+    // localDate.setUTCHours(localDate.getHours() - this.offsetHours);
+
+    return { startUtcDate, endUtcDate };
   }
 
   /*
-  @param {Date} date - Date object gmt+0
+  @param {String} date - gmt+0
   @return {string} "yyyy-mm-dd" gmt+7
   */
-  toGMT7String(date) {
-    const localDate = new Date(
-      date.getTime() + this.offsetHours * 60 * 60 * 1000
-    );
+  toGMT7String(dateStr) {
+    const date = new Date(dateStr);
+
+    const localDate = new Date(date.getTime() + this.offsetHours);
 
     const year = localDate.getFullYear();
     const month = String(localDate.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(localDate.getUTCDay()).padStart(2, "0");
+    const day = String(localDate.getDate()).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
   }
 }
+
+const dateConvert = new DateConverter();
+module.exports = dateConvert;

@@ -1,5 +1,5 @@
-const { da } = require("@faker-js/faker");
 const prisma = require("../config/prisma");
+const dateConvert = require("../lib/dateconvert");
 // import { Prisma } from '@prisma/client';
 const { PromotionStatus } = require("../generated/prisma");
 
@@ -63,27 +63,24 @@ exports.createNewPromotion = async (promotionData) => {
       }
     }
 
-    // JavaScript's new Date() constructor handles ISO 8601 strings (like "2025-07-29T00:00:00+07:00")
-    // by converting them into a Date object representing the corresponding UTC time.
-    //status valid
     const UTC = new Date();
-    const start = new Date(promotionData.startDate);
-    const end = new Date(promotionData.endDate);
+    const start = dateConvert.toGMT0(promotionData.startDate).startUtcDate;
+    const end = dateConvert.toGMT0(promotionData.endDate).endUtcDate;
     let status = "ACTIVE";
-    // if(UTC >= start && UTC <= end) {
-    //     status = 'ACTIVE'
-    // } else if ( UTC < start){
-    //     status = 'UPCOMING'
-    // } else {
-    //     status = 'EXPIRED'
-    // }
+    if (UTC >= start && UTC <= end) {
+      status = "ACTIVE";
+    } else if (UTC < start) {
+      status = "UPCOMING";
+    } else {
+      status = "EXPIRED";
+    }
 
     //create promotion
     const newPromotion = await prisma.promotions.create({
       data: {
         name: promotionData.name || null,
-        startDate: new Date(promotionData.startDate), // แปลงเป็น Date object
-        endDate: new Date(promotionData.endDate), // แปลงเป็น Date object
+        startDate: start,
+        endDate: end, // แปลงเป็น Date object
         // status จะใช้ค่า default "upcoming" หรือคุณจะส่งมาเองก็ได้
         status,
         discountType: promotionData.discountType,
@@ -106,11 +103,44 @@ exports.createNewPromotion = async (promotionData) => {
   }
 };
 
-exports.getPromotions = async () => {
-  try {
-    let whereClause = {};
+exports.getPromotions = async (limit, page, search, date) => {
+  let whereClause = {};
 
+  if (search) {
+    whereClause.OR = [
+      {
+        product: {
+          name: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+      },
+      {
+        product: {
+          barcode: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+      },
+    ];
+  }
+
+  if (date) {
+    const { startUtcDate, endUtcDate } = dateConvert.toGMT0(date);
+
+    whereClause.promotion = {
+      startDate: {
+        gte: startUtcDate,
+        lte: endUtcDate,
+      },
+    };
+  }
+
+  try {
     const result = await prisma.productPromotions.findMany({
+      where: whereClause,
       select: {
         product: {
           select: {
@@ -131,8 +161,8 @@ exports.getPromotions = async () => {
     });
 
     return result.map((data) => ({
-      startDate: data.promotion.startDate,
-      endDate: data.promotion.endDate,
+      startDate: dateConvert.toGMT7String(data.promotion.startDate),
+      endDate: dateConvert.toGMT7String(data.promotion.endDate),
       product: data.product.name,
       discountType: data.promotion.discountType,
       discountValue: data.promotion.discountValue,
