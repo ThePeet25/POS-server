@@ -18,6 +18,6 @@ router.post(
 router.get("/getproducts", productController.getProducts);
 router.get("/get/:barcode", productController.getOneProduct);
 router.get("/information/:id", productController.getProductInfo);
-router.delete("/delete", productController.deleteProduct);
+router.delete("/delete/:id", productController.deleteProduct);
 
 module.exports = router;
