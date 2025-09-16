@@ -1,3 +1,4 @@
+const prisma = require("../../config/prisma");
 const orderService = require("../../services/order.service");
 
 function generateReceiptId(length = 4) {
@@ -63,6 +64,24 @@ exports.getOrders = async (req, res) => {
     console.log("Error during get order ERROR:", error);
     res.status(500).json({
       message: "Error during get order",
+    });
+  }
+};
+
+exports.getOrderDetail = async (req, res) => {
+  const id = parseInt(req.params.id);
+
+  try {
+    const result = await orderService.getOrderDetail(id);
+
+    res.status(200).json({
+      product: result.orderDetails,
+      totalPrice: result.totalPrice,
+    });
+  } catch (error) {
+    console.error("Error during get order detail ERROR:", error);
+    res.status(500).json({
+      message: "Error during get order detail",
     });
   }
 };

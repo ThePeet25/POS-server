@@ -17,5 +17,6 @@ router.post(
 );
 
 router.get("/get", authentication, orderController.getOrders);
+router.get("/get/:id", authentication, orderController.getOrderDetail);
 
 module.exports = router;

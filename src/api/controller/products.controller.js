@@ -87,7 +87,7 @@ exports.getProductInfo = async (req, res) => {
     const result = await productService.getProductInfo(id);
 
     res.status(200).json({
-      restaurant: result,
+      product: result,
     });
   } catch (error) {
     console.log("Error during get product ERROR:", error);
@@ -124,10 +124,10 @@ exports.getOneProduct = async (req, res) => {
 };
 
 exports.deleteProduct = async (req, res) => {
-  const name = req.body.name;
+  const id = req.params.id;
 
   try {
-    const result = await productService.deleteProduct(name);
+    const result = await productService.deleteProduct(id);
     res.status(200).json({
       message: "delete success",
     });

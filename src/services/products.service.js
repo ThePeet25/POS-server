@@ -278,7 +278,7 @@ exports.getOneProduct = async (product) => {
 
 exports.getProductInfo = async (id) => {
   //1. query restaurant
-  const restaurant = await prisma.products.findFirst({
+  const product = await prisma.products.findFirst({
     where: {
       AND: [{ id }, { isDeleted: false }],
     },
@@ -307,37 +307,37 @@ exports.getProductInfo = async (id) => {
     },
   });
 
-  //2. map restaurant
-  let restaurantInfo = {
+  //2. map product
+  let productInfo = {
     id,
-    name: restaurant.name,
-    price: restaurant.price,
-    author: restaurant.author,
-    quantity: restaurant.quantity,
-    category: restaurant.category.name,
-    detail: restaurant.detail,
+    name: product.name,
+    price: product.price,
+    author: product.author,
+    quantity: product.quantity,
+    category: product.category.name,
+    detail: product.detail,
   };
 
   //3. add promotion price if have
-  const isHavePromotion = restaurant.productPromotions[0] || null;
+  const isHavePromotion = product.productPromotions[0] || null;
   if (isHavePromotion) {
     let discountPrice = priceCalculate(
-      restaurant.price,
+      product.price,
       isHavePromotion.promotion
     );
 
-    restaurantInfo.discountType = isHavePromotion.promotion.discountType;
-    restaurantInfo.discountValue = isHavePromotion.promotion.discountValue;
-    restaurantInfo.discountPrice = discountPrice;
+    productInfo.discountType = isHavePromotion.promotion.discountType;
+    productInfo.discountValue = isHavePromotion.promotion.discountValue;
+    productInfo.discountPrice = discountPrice;
   }
 
-  return restaurantInfo;
+  return productInfo;
 };
 
-exports.deleteProduct = async (name) => {
+exports.deleteProduct = async (id) => {
   await prisma.products.update({
     where: {
-      name,
+      id,
     },
     data: {
       isDeleted: true,

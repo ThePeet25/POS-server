@@ -24,7 +24,7 @@ this is backend server for POS website porject
 | GET    | /product/getproducts?    | limit = how many product in one page, sort = order by and sortOrder = asc(1to100) desc(100to1) | query ?page=<number>&limit=<number> optional sort, sortOrder |
 | GET    | /product/get/:barcode    | get product from barcode using for sale page                                                   | None                                                         |
 | GET    | /product/information/:id | get product information by id use in product information                                       | None                                                         |
-| DELETE | /product/delete          | delete product using in stock page                                                             | name                                                         |
+| DELETE | /product/delete/:id      | delete product using in stock page                                                             | id                                                           |
 
 ### category
 
@@ -52,3 +52,4 @@ this is backend server for POS website porject
 | ------ | ------------- | ------------------------------ | -------------------------------------------------------- |
 | POST   | /order/create | create oder using in sale page | orderLists: [{ productId, price, quantity}], total_price |
 | GET    | /order/get    | get order lists                | limit, page optional: search, date                       |
+| GET    | order/get/:id | get order list detail          | None                                                     |

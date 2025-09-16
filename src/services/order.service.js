@@ -175,3 +175,41 @@ exports.getOrders = async (page = 1, limit = 20, search, date = null) => {
     orderResult,
   };
 };
+
+exports.getOrderDetail = async (id) => {
+  //1. query
+  const detail = await prisma.orderItems.findMany({
+    where: {
+      orderId: id,
+    },
+    select: {
+      product: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      order: {
+        select: {
+          totalAmount: true,
+        },
+      },
+      quantity: true,
+      price: true,
+    },
+  });
+
+  console.log(detail);
+  //2. map
+  orderDetails = detail.map((order) => ({
+    id: order.product.id,
+    name: order.product.name,
+    quantity: order.quantity,
+    price: order.price,
+  }));
+
+  return {
+    orderDetails,
+    totalPrice: detail[0].order.totalAmount,
+  };
+};
