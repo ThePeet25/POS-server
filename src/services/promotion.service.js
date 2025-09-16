@@ -104,6 +104,9 @@ exports.createNewPromotion = async (promotionData) => {
 };
 
 exports.getPromotions = async (limit, page, search, date) => {
+  //1. set offset
+  // const offset = (page - 1) * limit;
+
   let whereClause = {};
 
   if (search) {
@@ -140,6 +143,8 @@ exports.getPromotions = async (limit, page, search, date) => {
 
   try {
     const result = await prisma.productPromotions.findMany({
+      skip: offset,
+      take: limit,
       where: whereClause,
       select: {
         product: {

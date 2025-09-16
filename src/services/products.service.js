@@ -221,10 +221,7 @@ exports.getOneProduct = async (product) => {
       AND: [
         { isDeleted: false },
         {
-          OR: [
-            { name: { contains: product, mode: "insensitive" } },
-            { barcode: { contains: product, mode: "insensitive" } },
-          ],
+          barcode: { contains: product, mode: "insensitive" },
         },
       ],
     },

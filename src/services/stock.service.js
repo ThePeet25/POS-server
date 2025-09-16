@@ -1,20 +1,24 @@
 const prisma = require("../config/prisma");
 const dateConvert = require("../lib/dateconvert");
 
-const findProductId = async (productName) => {
-  const productId = await prisma.products.findFirst({
+const findProduct = async (productName) => {
+  const product = await prisma.products.findFirst({
     where: {
       name: productName,
     },
     select: {
       id: true,
+      quantity: true,
     },
   });
 
-  if (!productId) {
+  if (!product) {
     return null;
   }
-  return productId.id;
+  return {
+    id: product.id,
+    quantity: product.quantity,
+  };
 };
 
 exports.createStock = async (stockData) => {
@@ -26,9 +30,29 @@ exports.createStock = async (stockData) => {
     return { success: false, status: 400, message: "Missing product data" };
   }
 
-  const productId = await findProductId(product);
+  const productId = (await findProduct(product)).id;
+  const productQuantity = (await findProduct(product)).quantity;
   if (productId === null) {
     return { success: false, status: 400, message: "product doesn't exist" };
+  }
+
+  //check stock type
+  let newQuantity;
+  if (transactionType === "increase") {
+    newQuantity = {
+      increment: quantity,
+    };
+  } else if (transactionType === "decrease") {
+    if (productQuantity < quantity) {
+      return {
+        success: false,
+        status: 400,
+        message: "quantity doesn't enough",
+      };
+    }
+    newQuantity = {
+      decrement: quantity,
+    };
   }
 
   const result = await prisma.$transaction(async (prisma) => {
@@ -42,17 +66,7 @@ exports.createStock = async (stockData) => {
       },
     });
 
-    //update current stock
-    let newQuantity;
-    if (transactionType === "increase") {
-      newQuantity = {
-        increment: quantity,
-      };
-    } else if (transactionType === "decrease") {
-      newQuantity = {
-        decrement: quantity,
-      };
-    }
+    //update stock
     const updateQuantity = await prisma.products.update({
       where: {
         id: productId,

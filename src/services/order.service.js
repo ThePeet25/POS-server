@@ -32,7 +32,7 @@ const priceCalculate = (price, Promotions) => {
 
 exports.createOrder = async (receiptId, orderLists, total_price, userId) => {
   //1. get product ID from order
-  const productIds = orderLists.map((item) => item.productId);
+  const productIds = orderLists.map((item) => item.id);
 
   //2. query products
   const products = await prisma.products.findMany({
@@ -77,10 +77,10 @@ exports.createOrder = async (receiptId, orderLists, total_price, userId) => {
   //5. calculate price
   let totalPrice = 0;
   const orderItems = orderLists.map((item) => {
-    const product = productMap[item.productId];
+    const product = productMap[item.id];
 
     if (product.quantity < item.quantity) {
-      throw new Error(`Not enough stock for product ${item.productId}`);
+      return false;
     }
 
     const isHavePromotion = product.productPromotions[0] || null;
@@ -94,21 +94,39 @@ exports.createOrder = async (receiptId, orderLists, total_price, userId) => {
       return {
         orderId: item.id,
         price: discountPrice,
-        productId: item.productId,
+        productId: item.id,
         quantity: item.quantity,
       };
     }
 
-    totalPrice += item.price * item.quantity;
+    totalPrice += product.price * item.quantity;
     return {
       orderId: item.id,
       price: product.price,
-      productId: item.productId,
+      productId: item.id,
       quantity: item.quantity,
     };
   });
 
-  //6. create data
+  if (orderItems.some((product) => product === false)) {
+    return {
+      success: false,
+      status: 400,
+      message: "Not enough stock for product",
+    };
+  }
+
+  //6. check total price
+  console.log(totalPrice);
+  if (totalPrice !== total_price) {
+    return {
+      success: false,
+      status: 400,
+      message: "Total price not match please calculator again",
+    };
+  }
+
+  //7. create data
   const result = await prisma.$transaction(async (tx) => {
     const order = await tx.orders.create({
       data: {
@@ -120,6 +138,19 @@ exports.createOrder = async (receiptId, orderLists, total_price, userId) => {
         id: true,
       },
     });
+
+    for (const item of orderItems) {
+      await tx.products.update({
+        where: {
+          id: item.productId,
+        },
+        data: {
+          quantity: {
+            decrement: item.quantity,
+          },
+        },
+      });
+    }
 
     await tx.orderItems.createMany({
       data: orderItems.map((item) => ({
@@ -171,7 +202,6 @@ exports.getOrders = async (page = 1, limit = 20, search, date = null) => {
   }));
 
   return {
-    message: "ok",
     orderResult,
   };
 };

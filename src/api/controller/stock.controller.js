@@ -9,7 +9,7 @@ exports.createStock = async (req, res) => {
     const result = await stockService.createStock(stockData);
 
     if (!result.success) {
-      res.status(result.status).json({ message: result.message });
+      return res.status(result.status).json({ message: result.message });
     }
     res.status(201).json({
       message: "Stock was created",
