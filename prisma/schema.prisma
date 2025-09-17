@@ -145,7 +145,7 @@ enum DiscountType {
 model StockTransactions {
   id              Int      @id @default(autoincrement())
   productId       Int
-  transactionType String // 'restock', 'adjustment' หรือ 'return'
+  transactionType String // 'increase', 'decrease
   quantity        Int // จำนวนที่เติม (เป็น +) หรือลด (เป็น -)
   costPerUnit     Decimal? @db.Decimal(10, 2) // ราคาต้นทุนต่อหน่วยในครั้งนั้นๆ
   transactionDate DateTime @default(now())
@@ -157,4 +157,30 @@ model StockTransactions {
 
   @@index([productId])
   @@map("stock_transactions")
+}
+
+//table lookup 
+model TotalLookup {
+  id       Int       @id @default(autoincrement())
+  type     TotalType
+  dateType DateType  @map("Date_Type")
+  value    Decimal   @db.Decimal(10, 2)
+  ref      Int? //ref on month or year
+
+  // income Income @relation(fields: [ref], references: [id])
+  parent   TotalLookup?  @relation("TotalHierarchy", fields: [ref], references: [id])
+  children TotalLookup[] @relation("TotalHierarchy")
+
+  @@map("total_lookup")
+}
+
+enum DateType {
+  Day
+  Month
+  Year
+}
+
+enum TotalType {
+  Income
+  Spend
 }

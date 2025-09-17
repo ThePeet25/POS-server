@@ -240,6 +240,6 @@ exports.getOrderDetail = async (id) => {
 
   return {
     orderDetails,
-    totalPrice: detail[0].order.totalAmount,
+    totalPrice: detail[0] ? detail[0].order.totalAmount : 0,
   };
 };
