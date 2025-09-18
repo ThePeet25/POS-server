@@ -104,7 +104,7 @@ async function main() {
 
       //5. create order and order item
       const numberOfOrder = 50;
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < numberOfOrder; i++) {
         const createdAt = randomDateInLast3Years();
         //create order
         const order = await prisma.orders.create({
@@ -121,29 +121,30 @@ async function main() {
         let totalAmount = 0;
         for (let j = 0; j < itemCount; j++) {
           const quantity = Math.floor(Math.random() * 5) + 1;
-          const productId = Math.floor(Math.random() * 3000) + 1;
-          const price = await prisma.products.findFirst({
-            where: {
-              id: productId,
-            },
-            select: {
-              price: true,
-            },
-          });
+          // const productId = Math.floor(Math.random() * 3000) + 1;
+          // const price = await prisma.products.findFirst({
+          //   where: {
+          //     id: productId,
+          //   },
+          //   select: {
+          //     price: true,
+          //   },
+          // });
+          const product = await prisma.$queryRawUnsafe(
+            `SELECT id, price from products ORDER BY RANDOM() LIMIT 1;`
+          );
+          console.log(product);
 
-          if (price === null) {
-            continue;
-          }
           await prisma.orderItems.create({
             data: {
               orderId: order.id,
-              productId,
+              productId: product[0].id,
               quantity,
-              price: price.price,
+              price: product[0].price,
             },
           });
 
-          totalAmount += quantity * price.price;
+          totalAmount += quantity * product[0].price;
           await prisma.orders.update({
             where: { id: order.id },
             data: {
@@ -154,6 +155,25 @@ async function main() {
       }
 
       //6. create stock transactions
+      const numberOfStock = 50;
+      for (let i = 0; i < numberOfStock; i++) {
+        const createdAt = randomDateInLast3Years();
+        const transactionDate = createdAt;
+        const transactionType = Math.random() > 0.5 ? "increase" : "decrease";
+        const quantity = Math.floor(Math.random() * 5) + 1;
+        const product = await prisma.$queryRawUnsafe(
+          `SELECT id from products ORDER BY RANDOM() LIMIT 1;`
+        );
+
+        await prisma.stockTransactions.create({
+          data: {
+            productId: product[0].id,
+            transactionType,
+            transactionDate,
+            quantity,
+          },
+        });
+      }
     });
   } catch (err) {
     console.error("Error during setup ERROR:", err);

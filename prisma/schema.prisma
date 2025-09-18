@@ -161,11 +161,12 @@ model StockTransactions {
 
 //table lookup 
 model TotalLookup {
-  id       Int       @id @default(autoincrement())
-  type     TotalType
-  dateType DateType  @map("Date_Type")
-  value    Decimal   @db.Decimal(10, 2)
-  ref      Int? //ref on month or year
+  id        Int       @id @default(autoincrement())
+  type      TotalType
+  dateType  DateType  @map("Date_Type")
+  dateValue String    @unique
+  value     Decimal   @db.Decimal(10, 2)
+  ref       Int? //ref on month or year
 
   // income Income @relation(fields: [ref], references: [id])
   parent   TotalLookup?  @relation("TotalHierarchy", fields: [ref], references: [id])
