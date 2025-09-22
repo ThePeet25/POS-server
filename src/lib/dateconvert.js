@@ -33,7 +33,7 @@ class DateConverter {
 
     const year = localDate.getFullYear();
     const month = String(localDate.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(localDate.getDate()).padStart(2, "0");
+    const day = String(localDate.getUTCDate()).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
   }

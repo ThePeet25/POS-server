@@ -180,4 +180,4 @@ const total = new TotalLookup();
 // total.updateDayIncome("2024-05-09");
 // total.updateMonthIncome("2024-09");
 // total.updateYearIncome("2025");
-total.generateLookups();
+module.exports = total;

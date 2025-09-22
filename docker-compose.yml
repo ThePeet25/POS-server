@@ -15,10 +15,12 @@ services:
       NODE_ENV: "dev"
     networks:
       - backend_network
-    depends_on:
-      db:
-        condition: service_healthy
-    command: sh -c "npx prisma migrate deploy && npm run seed &&npm run dev"
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
+    command: sh -c "npx prisma migrate deploy && npm run dev"
 
   db:
     image: postgres:16.3-alpine
@@ -32,7 +34,7 @@ services:
     volumes:
       - dev:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d review_restaurant"] # ตรวจสอบว่า DB พร้อมรับ Connection
+      test: ["CMD-SHELL", "pg_isready -U admin -d POS"] # ตรวจสอบว่า DB พร้อมรับ Connection
       interval: 5s # ตรวจสอบทุก 5 วินาที
       timeout: 5s # Timeout 5 วินาที
       retries: 5 # ลอง 5 ครั้งก่อนประกาศว่าไม่ healthy

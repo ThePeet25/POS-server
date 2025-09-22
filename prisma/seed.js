@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 // Import Prisma Client
 const { PrismaClient, Prisma } = require("../src/generated/prisma");
 const prisma = new PrismaClient();
+const totalLookup = require("../src/lib/totallookup");
 
 function randomDateInLast3Years() {
   const now = new Date();
@@ -175,6 +176,7 @@ async function main() {
         });
       }
     });
+    await totalLookup.generateLookups();
   } catch (err) {
     console.error("Error during setup ERROR:", err);
   }

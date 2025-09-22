@@ -1,6 +1,7 @@
 const prisma = require("../config/prisma");
 const dateConvert = require("../lib/dateconvert");
 const { includes } = require("../middleware/auth.middleware");
+const totalLookup = require("../lib/totallookup");
 
 const findProductId = async (productName) => {
   const productId = await prisma.products.findFirst({
@@ -159,6 +160,7 @@ exports.createOrder = async (receiptId, orderLists, total_price, userId) => {
       })),
     });
 
+    totalLookup.updateDayIncome(dateConvert.toGMT7String(new Date()));
     return receiptId;
   });
 
