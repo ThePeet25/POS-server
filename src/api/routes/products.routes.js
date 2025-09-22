@@ -15,9 +15,18 @@ router.post(
   productController.createProduct
 );
 // router.get('/getproducts', authentication, authorizeRoles(['manager', 'cashier']), productController.getProducts)
-router.get("/getproducts", productController.getProducts);
-router.get("/get/:barcode", productController.getOneProduct);
-router.get("/information/:id", productController.getProductInfo);
-router.delete("/delete/:id", productController.deleteProduct);
+router.get("/getproducts", authentication, productController.getProducts);
+router.get("/get/:barcode", authentication, productController.getOneProduct);
+router.get(
+  "/information/:id",
+  authentication,
+  productController.getProductInfo
+);
+router.delete(
+  "/delete/:id",
+  authentication,
+  authorizeRoles(["manager"]),
+  productController.deleteProduct
+);
 
 module.exports = router;

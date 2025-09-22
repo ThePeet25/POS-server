@@ -7,7 +7,12 @@ const [
   authorizeRoles,
 ] = require("../../middleware/auth.middleware");
 
-router.post("/create", promotionController.createPromotion);
+router.post(
+  "/create",
+  authentication,
+  authorizeRoles(["manager"]),
+  promotionController.createPromotion
+);
 router.get(
   "/get",
   authentication,
